@@ -24,7 +24,7 @@ const Navbar = () => {
             </Button>
           )}
           <a href="/" className="flex items-center">
-            <span className="text-xl font-bold text-brand-blue">EasyAdsGenie</span>
+            <span className="text-xl font-bold text-brand-blue">Seba Generador de Anuncios</span>
           </a>
         </div>
 
