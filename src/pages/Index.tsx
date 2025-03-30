@@ -28,7 +28,7 @@ const Index = () => {
             <div className="p-6">
               <div className="max-w-4xl mx-auto text-center mb-8">
                 <h1 className="text-3xl font-bold mb-4">
-                  ¡Bienvenido a EasyAdsGenie!
+                  ¡Bienvenido a Seba Generador de Anuncios!
                 </h1>
                 <p className="text-lg text-gray-600 mb-6">
                   Configura tu cuenta para empezar a crear anuncios efectivos en Facebook que impulsen tu negocio.

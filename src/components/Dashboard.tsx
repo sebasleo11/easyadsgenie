@@ -52,7 +52,7 @@ const Dashboard = ({ userData }: DashboardProps) => {
   return (
     <div className="flex-1 space-y-6 p-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">¡Bienvenido a EasyAdsGenie!</h1>
+        <h1 className="text-2xl font-bold">¡Bienvenido a Seba Generador de Anuncios!</h1>
         <Button className="bg-brand-blue hover:bg-brand-darkBlue">
           <PlusCircle className="mr-2 h-4 w-4" /> Nueva Campaña
         </Button>
