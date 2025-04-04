@@ -11,12 +11,16 @@ import {
   Image,
   ThumbsUp
 } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 
 interface SidebarProps {
   className?: string;
 }
 
 const Sidebar = ({ className }: SidebarProps) => {
+  const location = useLocation();
+  const currentPath = location.pathname;
+
   return (
     <div className={cn("pb-12 w-64 bg-white border-r hidden md:block", className)}>
       <div className="space-y-4 py-4">
@@ -25,13 +29,25 @@ const Sidebar = ({ className }: SidebarProps) => {
             Panel Principal
           </h2>
           <div className="space-y-1">
-            <Button variant="secondary" className="w-full justify-start">
-              <LayoutDashboard className="mr-2 h-4 w-4" />
-              Dashboard
+            <Button 
+              variant={currentPath === "/" ? "secondary" : "ghost"} 
+              className="w-full justify-start"
+              asChild
+            >
+              <Link to="/">
+                <LayoutDashboard className="mr-2 h-4 w-4" />
+                Dashboard
+              </Link>
             </Button>
-            <Button variant="ghost" className="w-full justify-start">
-              <BarChartBig className="mr-2 h-4 w-4" />
-              Métricas
+            <Button 
+              variant={currentPath === "/metricas" ? "secondary" : "ghost"} 
+              className="w-full justify-start"
+              asChild
+            >
+              <Link to="/metricas">
+                <BarChartBig className="mr-2 h-4 w-4" />
+                Métricas
+              </Link>
             </Button>
           </div>
         </div>
@@ -40,25 +56,55 @@ const Sidebar = ({ className }: SidebarProps) => {
             Anuncios
           </h2>
           <div className="space-y-1">
-            <Button variant="ghost" className="w-full justify-start">
-              <TrendingUp className="mr-2 h-4 w-4" />
-              Campañas
+            <Button 
+              variant={currentPath === "/campanas" ? "secondary" : "ghost"} 
+              className="w-full justify-start"
+              asChild
+            >
+              <Link to="/campanas">
+                <TrendingUp className="mr-2 h-4 w-4" />
+                Campañas
+              </Link>
             </Button>
-            <Button variant="ghost" className="w-full justify-start">
-              <Target className="mr-2 h-4 w-4" />
-              Segmentación
+            <Button 
+              variant={currentPath === "/segmentacion" ? "secondary" : "ghost"} 
+              className="w-full justify-start"
+              asChild
+            >
+              <Link to="/segmentacion">
+                <Target className="mr-2 h-4 w-4" />
+                Segmentación
+              </Link>
             </Button>
-            <Button variant="ghost" className="w-full justify-start">
-              <MessageSquare className="mr-2 h-4 w-4" />
-              Creatividades
+            <Button 
+              variant={currentPath === "/creatividades" ? "secondary" : "ghost"} 
+              className="w-full justify-start"
+              asChild
+            >
+              <Link to="/creatividades">
+                <MessageSquare className="mr-2 h-4 w-4" />
+                Creatividades
+              </Link>
             </Button>
-            <Button variant="ghost" className="w-full justify-start">
-              <Image className="mr-2 h-4 w-4" />
-              Imágenes
+            <Button 
+              variant={currentPath === "/imagenes" ? "secondary" : "ghost"} 
+              className="w-full justify-start"
+              asChild
+            >
+              <Link to="/imagenes">
+                <Image className="mr-2 h-4 w-4" />
+                Imágenes
+              </Link>
             </Button>
-            <Button variant="ghost" className="w-full justify-start">
-              <ThumbsUp className="mr-2 h-4 w-4" />
-              Optimización
+            <Button 
+              variant={currentPath === "/optimizacion" ? "secondary" : "ghost"} 
+              className="w-full justify-start"
+              asChild
+            >
+              <Link to="/optimizacion">
+                <ThumbsUp className="mr-2 h-4 w-4" />
+                Optimización
+              </Link>
             </Button>
           </div>
         </div>
@@ -67,9 +113,15 @@ const Sidebar = ({ className }: SidebarProps) => {
             Configuración
           </h2>
           <div className="space-y-1">
-            <Button variant="ghost" className="w-full justify-start">
-              <Settings className="mr-2 h-4 w-4" />
-              Preferencias
+            <Button 
+              variant={currentPath === "/preferencias" ? "secondary" : "ghost"} 
+              className="w-full justify-start"
+              asChild
+            >
+              <Link to="/preferencias">
+                <Settings className="mr-2 h-4 w-4" />
+                Preferencias
+              </Link>
             </Button>
           </div>
         </div>

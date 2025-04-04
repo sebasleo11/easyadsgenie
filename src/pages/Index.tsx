@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
 import OnboardingWizard from "@/components/OnboardingWizard";
@@ -12,10 +13,18 @@ const Index = () => {
   const [onboarded, setOnboarded] = useState(false);
   const [userData, setUserData] = useState(null);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
 
   const handleOnboardingComplete = (data: any) => {
     setUserData(data);
     setOnboarded(true);
+  };
+
+  const handleTabChange = (value: string) => {
+    if (value === "adcreator") {
+      // This is just to handle the tab navigation within the component
+      // The Sidebar now handles actual route navigation
+    }
   };
 
   return (
@@ -37,7 +46,7 @@ const Index = () => {
               <OnboardingWizard onComplete={handleOnboardingComplete} />
             </div>
           ) : (
-            <Tabs defaultValue="dashboard" className="w-full">
+            <Tabs defaultValue="dashboard" className="w-full" onValueChange={handleTabChange}>
               <div className="border-b">
                 <div className="container flex h-14 items-center">
                   <TabsList className="grid w-60 grid-cols-2">
