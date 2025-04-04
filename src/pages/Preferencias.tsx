@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -9,8 +8,10 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Settings, User, Bell, Shield, CreditCard, Save, Facebook, Instagram, Linkedin, Globe } from "lucide-react";
+import { Settings, User, Bell, Shield, CreditCard, Save, Facebook, Instagram, Linkedin, Globe, Bot } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useAssistant, AssistantMode, AssistantTone } from "@/contexts/AssistantContext";
+import WebhookSettings from "@/components/WebhookSettings";
 
 const Preferencias = () => {
   const [userProfile, setUserProfile] = useState({
@@ -43,6 +44,8 @@ const Preferencias = () => {
     loginNotifications: true,
     apiAccessNotifications: true
   });
+
+  const { isEnabled, mode, tone, updatePreferences } = useAssistant();
 
   const handleProfileUpdate = () => {
     toast({
@@ -80,6 +83,11 @@ const Preferencias = () => {
     });
   };
 
+  const handleSaveAssistantSettings = async () => {
+    // This function uses the context's updatePreferences function
+    // which already handles toasts and error handling
+  };
+
   return (
     <Layout>
       <div className="flex-1 space-y-6 p-6">
@@ -103,6 +111,10 @@ const Preferencias = () => {
             <TabsTrigger value="security" className="flex gap-2">
               <Shield className="h-4 w-4" />
               Seguridad
+            </TabsTrigger>
+            <TabsTrigger value="assistant" className="flex gap-2">
+              <Bot className="h-4 w-4" />
+              Asistente
             </TabsTrigger>
           </TabsList>
           
@@ -616,6 +628,117 @@ const Preferencias = () => {
                   Guardar Configuración
                 </Button>
               </CardFooter>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="assistant">
+            <Card>
+              <CardHeader>
+                <CardTitle>Configuración del Asistente Virtual (SebaBot)</CardTitle>
+                <CardDescription>Personaliza cómo interactúa el asistente contigo</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Activar Asistente Virtual</p>
+                      <p className="text-sm text-gray-500">Habilita o deshabilita el asistente virtual en toda la aplicación</p>
+                    </div>
+                    <Switch 
+                      checked={isEnabled} 
+                      onCheckedChange={(checked) => updatePreferences({ assistant_enabled: checked })}
+                    />
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <Label htmlFor="assistant-mode">Modo del Asistente</Label>
+                    <Select 
+                      value={mode} 
+                      onValueChange={(value: AssistantMode) => updatePreferences({ assistant_mode: value })}
+                    >
+                      <SelectTrigger id="assistant-mode">
+                        <SelectValue placeholder="Selecciona un modo" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="basic">
+                          <div className="font-medium">Básico</div>
+                          <div className="text-sm text-muted-foreground">Instrucciones paso a paso con lenguaje claro</div>
+                        </SelectItem>
+                        <SelectItem value="advanced">
+                          <div className="font-medium">Avanzado</div>
+                          <div className="text-sm text-muted-foreground">Estrategias más complejas y consejos prácticos</div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <Label htmlFor="assistant-tone">Tono del Asistente</Label>
+                    <Select 
+                      value={tone} 
+                      onValueChange={(value: AssistantTone) => updatePreferences({ assistant_tone: value })}
+                    >
+                      <SelectTrigger id="assistant-tone">
+                        <SelectValue placeholder="Selecciona un tono" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="formal">
+                          <div className="font-medium">Formal</div>
+                          <div className="text-sm text-muted-foreground">Lenguaje profesional y preciso</div>
+                        </SelectItem>
+                        <SelectItem value="casual">
+                          <div className="font-medium">Casual</div>
+                          <div className="text-sm text-muted-foreground">Conversacional y amigable</div>
+                        </SelectItem>
+                        <SelectItem value="motivational">
+                          <div className="font-medium">Motivador</div>
+                          <div className="text-sm text-muted-foreground">Inspirador y entusiasta</div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label>Ejemplo de Mensaje</Label>
+                    <div className="mt-2 p-4 border rounded-md bg-gray-50">
+                      {tone === 'formal' && mode === 'basic' && (
+                        <p>Bienvenido a la segmentación de audiencia. Vamos a definir paso a paso a quién irá dirigido su anuncio.</p>
+                      )}
+                      {tone === 'casual' && mode === 'basic' && (
+                        <p>¡Hola! Vamos a definir juntos quién verá tu anuncio. Es más fácil de lo que parece.</p>
+                      )}
+                      {tone === 'motivational' && mode === 'basic' && (
+                        <p>¡Es momento de encontrar a tu audiencia ideal! Con una buena segmentación, multiplicarás el impacto de tu mensaje.</p>
+                      )}
+                      {tone === 'formal' && mode === 'advanced' && (
+                        <p>Bienvenido a la segmentación avanzada. Analizaremos variables demográficas, psicográficas y comportamentales para optimizar su alcance.</p>
+                      )}
+                      {tone === 'casual' && mode === 'advanced' && (
+                        <p>¡Hola! Vamos a trabajar con criterios avanzados de segmentación. Verás que con estos ajustes conseguiremos mejores resultados.</p>
+                      )}
+                      {tone === 'motivational' && mode === 'advanced' && (
+                        <p>¡Es hora de llevar tu segmentación al siguiente nivel! Estos ajustes avanzados serán clave para maximizar el impacto y ROI de tu campaña.</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-end">
+                <Button onClick={handleSaveAssistantSettings}>
+                  <Save className="mr-2 h-4 w-4" />
+                  Guardar Configuración
+                </Button>
+              </CardFooter>
+            </Card>
+            
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle>Integración con N8N</CardTitle>
+                <CardDescription>Configura webhooks para automatizar reportes y alertas</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <WebhookSettings />
+              </CardContent>
             </Card>
           </TabsContent>
         </Tabs>

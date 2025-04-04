@@ -9,7 +9,99 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      assistant_responses: {
+        Row: {
+          category: string
+          created_at: string | null
+          id: string
+          mode: string
+          response_text: string
+          tone: string
+          trigger_point: string
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          id?: string
+          mode: string
+          response_text: string
+          tone: string
+          trigger_point: string
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          id?: string
+          mode?: string
+          response_text?: string
+          tone?: string
+          trigger_point?: string
+        }
+        Relationships: []
+      }
+      n8n_webhooks: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean
+          updated_at: string | null
+          user_id: string | null
+          webhook_name: string
+          webhook_type: string
+          webhook_url: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean
+          updated_at?: string | null
+          user_id?: string | null
+          webhook_name: string
+          webhook_type: string
+          webhook_url: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean
+          updated_at?: string | null
+          user_id?: string | null
+          webhook_name?: string
+          webhook_type?: string
+          webhook_url?: string
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          assistant_enabled: boolean
+          assistant_mode: string
+          assistant_tone: string
+          created_at: string | null
+          id: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          assistant_enabled?: boolean
+          assistant_mode?: string
+          assistant_tone?: string
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          assistant_enabled?: boolean
+          assistant_mode?: string
+          assistant_tone?: string
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
