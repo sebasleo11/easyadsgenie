@@ -93,8 +93,8 @@ export const AssistantProvider = ({ children }: { children: ReactNode }) => {
           
           if (data) {
             setIsEnabled(data.assistant_enabled);
-            setMode(data.assistant_mode);
-            setTone(data.assistant_tone);
+            setMode(data.assistant_mode as AssistantMode);
+            setTone(data.assistant_tone as AssistantTone);
           }
         }
       } catch (error) {
