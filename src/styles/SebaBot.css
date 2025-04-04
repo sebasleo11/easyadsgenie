@@ -1,0 +1,63 @@
+@keyframes robotBlink {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.1); }
+}
+
+@keyframes robotPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.seba-bot-robot-head {
+  animation: robotPulse 2s infinite;
+}
+
+.seba-bot-robot-head .robot-eye {
+  animation: robotBlink 4s infinite;
+}
+
+.seba-bot-chat-enter {
+  animation: chatExpand 0.3s ease-out forwards;
+}
+
+.seba-bot-chat-exit {
+  animation: chatCollapse 0.3s ease-in forwards;
+}
+
+@keyframes chatExpand {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes chatCollapse {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+}
+
+.seba-bot-message {
+  animation: messageSlideIn 0.3s ease-out forwards;
+}
+
+@keyframes messageSlideIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+} 

@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +13,8 @@ import Creatividades from "./pages/Creatividades";
 import Imagenes from "./pages/Imagenes";
 import Optimizacion from "./pages/Optimizacion";
 import Preferencias from "./pages/Preferencias";
+import SebaBot from "./components/SebaBot";
+import "./styles/SebaBot.css";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+        <SebaBot />
       </TooltipProvider>
     </AssistantProvider>
   </QueryClientProvider>
