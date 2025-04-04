@@ -223,7 +223,7 @@ const Creatividades = () => {
                 <DialogHeader>
                   <DialogTitle>Crear Nueva Plantilla</DialogTitle>
                   <DialogDescription>
-                    Crea una plantilla para tus anuncios. Usa {VARIABLE} para indicar campos variables.
+                    Crea una plantilla para tus anuncios. Usa {"{VARIABLE}"} para indicar campos variables.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
