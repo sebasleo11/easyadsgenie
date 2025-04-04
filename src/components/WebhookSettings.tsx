@@ -1,60 +1,57 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { AlertCircle, Plus, Trash } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
+type WebhookType = 'report' | 'alert' | 'notification';
 
 interface Webhook {
   id: string;
   webhook_name: string;
   webhook_url: string;
-  webhook_type: 'report' | 'alert' | 'notification';
+  webhook_type: WebhookType;
   is_active: boolean;
 }
 
 const WebhookSettings = () => {
   const [webhooks, setWebhooks] = useState<Webhook[]>([]);
   const [loading, setLoading] = useState(true);
-  const [newWebhook, setNewWebhook] = useState<Partial<Webhook>>({
+  const [adding, setAdding] = useState(false);
+  const [newWebhook, setNewWebhook] = useState({
     webhook_name: '',
     webhook_url: '',
-    webhook_type: 'report',
-    is_active: true
+    webhook_type: 'report' as WebhookType,
   });
 
-  const loadWebhooks = async () => {
+  useEffect(() => {
+    fetchWebhooks();
+  }, []);
+
+  const fetchWebhooks = async () => {
     try {
-      setLoading(true);
       const { data: authData } = await supabase.auth.getUser();
-      
       if (!authData?.user) {
-        toast({
-          title: "Error",
-          description: "Debes iniciar sesión para ver tus webhooks.",
-          variant: "destructive",
-        });
+        setLoading(false);
         return;
       }
-      
+
       const { data, error } = await supabase
         .from('n8n_webhooks')
         .select('*')
         .eq('user_id', authData.user.id);
-      
+
       if (error) throw error;
-      
+
       setWebhooks(data || []);
     } catch (error) {
-      console.error('Error loading webhooks:', error);
+      console.error('Error fetching webhooks:', error);
       toast({
         title: "Error",
         description: "No se pudieron cargar los webhooks.",
@@ -65,23 +62,20 @@ const WebhookSettings = () => {
     }
   };
 
-  useEffect(() => {
-    loadWebhooks();
-  }, []);
-
   const handleAddWebhook = async () => {
-    try {
-      if (!newWebhook.webhook_name || !newWebhook.webhook_url) {
-        toast({
-          title: "Error",
-          description: "El nombre y la URL son obligatorios.",
-          variant: "destructive",
-        });
-        return;
-      }
+    // Simple validation
+    if (!newWebhook.webhook_name.trim() || !newWebhook.webhook_url.trim()) {
+      toast({
+        title: "Error",
+        description: "El nombre y la URL del webhook son obligatorios.",
+        variant: "destructive",
+      });
+      return;
+    }
 
+    try {
+      setAdding(true);
       const { data: authData } = await supabase.auth.getUser();
-      
       if (!authData?.user) {
         toast({
           title: "Error",
@@ -90,39 +84,40 @@ const WebhookSettings = () => {
         });
         return;
       }
-      
+
       const { error } = await supabase
         .from('n8n_webhooks')
         .insert({
           user_id: authData.user.id,
           webhook_name: newWebhook.webhook_name,
           webhook_url: newWebhook.webhook_url,
-          webhook_type: newWebhook.webhook_type || 'report',
-          is_active: newWebhook.is_active !== undefined ? newWebhook.is_active : true
+          webhook_type: newWebhook.webhook_type,
+          is_active: true,
         });
-      
+
       if (error) throw error;
-      
+
       toast({
         title: "Webhook añadido",
-        description: "El webhook ha sido agregado correctamente.",
+        description: "El webhook ha sido añadido correctamente.",
       });
-      
-      // Reset form and reload webhooks
+
+      // Reset form and refresh list
       setNewWebhook({
         webhook_name: '',
         webhook_url: '',
         webhook_type: 'report',
-        is_active: true
       });
-      await loadWebhooks();
+      fetchWebhooks();
     } catch (error) {
       console.error('Error adding webhook:', error);
       toast({
         title: "Error",
-        description: "No se pudo añadir el webhook.",
+        description: "No se pudo añadir el webhook. Inténtalo de nuevo.",
         variant: "destructive",
       });
+    } finally {
+      setAdding(false);
     }
   };
 
@@ -132,14 +127,17 @@ const WebhookSettings = () => {
         .from('n8n_webhooks')
         .update({ is_active: !currentStatus })
         .eq('id', id);
-      
+
       if (error) throw error;
-      
-      await loadWebhooks();
-      
+
+      // Update local state
+      setWebhooks(webhooks.map(webhook => 
+        webhook.id === id ? { ...webhook, is_active: !currentStatus } : webhook
+      ));
+
       toast({
         title: "Estado actualizado",
-        description: `El webhook ha sido ${!currentStatus ? 'activado' : 'desactivado'}.`,
+        description: `Webhook ${!currentStatus ? 'activado' : 'desactivado'}.`,
       });
     } catch (error) {
       console.error('Error toggling webhook status:', error);
@@ -157,11 +155,12 @@ const WebhookSettings = () => {
         .from('n8n_webhooks')
         .delete()
         .eq('id', id);
-      
+
       if (error) throw error;
-      
-      await loadWebhooks();
-      
+
+      // Update local state
+      setWebhooks(webhooks.filter(webhook => webhook.id !== id));
+
       toast({
         title: "Webhook eliminado",
         description: "El webhook ha sido eliminado correctamente.",
@@ -176,150 +175,116 @@ const WebhookSettings = () => {
     }
   };
 
-  const testWebhook = async (url: string) => {
-    try {
-      await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        mode: 'no-cors',
-        body: JSON.stringify({
-          timestamp: new Date().toISOString(),
-          test: true,
-          message: 'This is a test from Seba Generador de Anuncios'
-        }),
-      });
-      
-      toast({
-        title: "Solicitud enviada",
-        description: "La solicitud de prueba ha sido enviada al webhook.",
-      });
-    } catch (error) {
-      console.error('Error testing webhook:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo enviar la solicitud de prueba.",
-        variant: "destructive",
-      });
-    }
+  const webhookTypeLabels = {
+    report: "Informes periódicos",
+    alert: "Alertas de rendimiento",
+    notification: "Notificaciones"
   };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-medium">Configuración de Webhooks para N8N</h3>
-        <p className="text-sm text-gray-500 mt-1">
-          Conecta N8N para automatizar reportes y alertas de rendimiento.
-        </p>
-      </div>
+      <Alert className="mb-4">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Integración con N8N</AlertTitle>
+        <AlertDescription>
+          Configura webhooks para enviar automáticamente datos a tus flujos de trabajo en N8N.
+          Puedes crear diferentes webhooks para distintos tipos de notificaciones.
+        </AlertDescription>
+      </Alert>
 
-      <div className="space-y-4 border rounded-md p-4">
-        <h4 className="text-md font-medium">Añadir Nuevo Webhook</h4>
-        
-        <div className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="webhook_name">Nombre</Label>
-            <Input
-              id="webhook_name"
-              value={newWebhook.webhook_name}
-              onChange={(e) => setNewWebhook({...newWebhook, webhook_name: e.target.value})}
-              placeholder="Ejemplo: Reporte Semanal"
-            />
-          </div>
-          
-          <div className="grid gap-2">
-            <Label htmlFor="webhook_url">URL del Webhook</Label>
-            <Input
-              id="webhook_url"
-              value={newWebhook.webhook_url}
-              onChange={(e) => setNewWebhook({...newWebhook, webhook_url: e.target.value})}
-              placeholder="https://n8n.example.com/webhook/..."
-            />
-          </div>
-          
-          <div className="grid gap-2">
-            <Label htmlFor="webhook_type">Tipo</Label>
-            <Select
-              value={newWebhook.webhook_type}
-              onValueChange={(value: 'report' | 'alert' | 'notification') => 
-                setNewWebhook({...newWebhook, webhook_type: value})
-              }
-            >
-              <SelectTrigger id="webhook_type">
-                <SelectValue placeholder="Selecciona un tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="report">Reporte</SelectItem>
-                <SelectItem value="alert">Alerta</SelectItem>
-                <SelectItem value="notification">Notificación</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="is_active"
-              checked={newWebhook.is_active}
-              onCheckedChange={(checked) => setNewWebhook({...newWebhook, is_active: checked})}
-            />
-            <Label htmlFor="is_active">Activo</Label>
-          </div>
-          
-          <Button onClick={handleAddWebhook}>
-            Añadir Webhook
-          </Button>
-        </div>
-      </div>
-
-      <div className="border rounded-md p-4">
-        <h4 className="text-md font-medium mb-4">Webhooks Configurados</h4>
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Tus Webhooks</h3>
         
         {loading ? (
-          <p>Cargando webhooks...</p>
+          <p className="text-sm text-gray-500">Cargando webhooks...</p>
         ) : webhooks.length === 0 ? (
-          <p className="text-sm text-gray-500">No tienes webhooks configurados.</p>
+          <p className="text-sm text-gray-500">No tienes webhooks configurados. Añade uno nuevo para comenzar.</p>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {webhooks.map((webhook) => (
-              <div key={webhook.id} className="p-4 border rounded-md bg-gray-50">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">{webhook.webhook_name}</p>
-                    <p className="text-sm text-gray-500">{webhook.webhook_url}</p>
-                    <div className="flex items-center mt-1">
-                      <span className={`inline-block h-2 w-2 rounded-full mr-2 ${webhook.is_active ? 'bg-green-500' : 'bg-gray-300'}`}></span>
-                      <span className="text-xs">{webhook.webhook_type} - {webhook.is_active ? 'Activo' : 'Inactivo'}</span>
-                    </div>
+              <div 
+                key={webhook.id} 
+                className={`p-3 border rounded-md flex items-center justify-between ${webhook.is_active ? 'bg-white' : 'bg-gray-50'}`}
+              >
+                <div className="space-y-1">
+                  <p className="font-medium">{webhook.webhook_name}</p>
+                  <p className="text-xs text-gray-500 truncate max-w-xs">{webhook.webhook_url}</p>
+                  <span className="inline-block px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary">
+                    {webhookTypeLabels[webhook.webhook_type]}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1">
+                    <span className="text-sm text-gray-500">{webhook.is_active ? 'Activo' : 'Inactivo'}</span>
+                    <Switch 
+                      checked={webhook.is_active} 
+                      onCheckedChange={() => toggleWebhookStatus(webhook.id, webhook.is_active)} 
+                    />
                   </div>
-                  <div className="flex space-x-2">
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => testWebhook(webhook.webhook_url)}
-                    >
-                      Probar
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant={webhook.is_active ? "destructive" : "default"}
-                      onClick={() => toggleWebhookStatus(webhook.id, webhook.is_active)}
-                    >
-                      {webhook.is_active ? 'Desactivar' : 'Activar'}
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => deleteWebhook(webhook.id)}
-                    >
-                      Eliminar
-                    </Button>
-                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => deleteWebhook(webhook.id)}
+                  >
+                    <Trash className="h-4 w-4 text-gray-500" />
+                  </Button>
                 </div>
               </div>
             ))}
           </div>
         )}
+      </div>
+
+      <div className="space-y-4 pt-4 border-t">
+        <h3 className="text-lg font-medium">Añadir nuevo Webhook</h3>
+        
+        <div className="grid gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="webhook-name">Nombre del Webhook</Label>
+            <Input 
+              id="webhook-name" 
+              placeholder="Ej: Informe Semanal" 
+              value={newWebhook.webhook_name}
+              onChange={(e) => setNewWebhook({...newWebhook, webhook_name: e.target.value})}
+            />
+          </div>
+          
+          <div className="grid gap-2">
+            <Label htmlFor="webhook-url">URL del Webhook</Label>
+            <Input 
+              id="webhook-url" 
+              placeholder="https://n8n.example.com/webhook/..." 
+              value={newWebhook.webhook_url}
+              onChange={(e) => setNewWebhook({...newWebhook, webhook_url: e.target.value})}
+            />
+          </div>
+          
+          <div className="grid gap-2">
+            <Label htmlFor="webhook-type">Tipo de Webhook</Label>
+            <Select 
+              value={newWebhook.webhook_type} 
+              onValueChange={(value: WebhookType) => setNewWebhook({...newWebhook, webhook_type: value})}
+            >
+              <SelectTrigger id="webhook-type">
+                <SelectValue placeholder="Selecciona un tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="report">Informes periódicos</SelectItem>
+                <SelectItem value="alert">Alertas de rendimiento</SelectItem>
+                <SelectItem value="notification">Notificaciones</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <Button 
+            className="w-full" 
+            onClick={handleAddWebhook} 
+            disabled={adding}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            {adding ? 'Añadiendo...' : 'Añadir Webhook'}
+          </Button>
+        </div>
       </div>
     </div>
   );
