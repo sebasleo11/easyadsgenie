@@ -50,7 +50,7 @@ const sampleCopyTemplates: CopyTemplate[] = [
     id: 3,
     title: "Testimonio de Cliente",
     headline: "{PRODUCTO}: Cambiando la vida de nuestros clientes",
-    description: ""{TESTIMONIO}" - {NOMBRE_CLIENTE}, {UBICACION}",
+    description: "\"{TESTIMONIO}\" - {NOMBRE_CLIENTE}, {UBICACION}",
     callToAction: "Ver Historias",
     type: 'brand'
   },
